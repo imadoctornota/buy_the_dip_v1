@@ -11,11 +11,6 @@ This is an exploratory historical analysis, not investment advice.
 # ==============================================================================
 # 2. Imports and settings
 
-
-# ==============================================================================
-# What this step is doing — and why
-
-
 from pathlib import Path
 
 import numpy as np
@@ -57,11 +52,6 @@ print("Focus tickers:", FOCUS_TICKERS)
 
 # ==============================================================================
 # 3. Download adjusted price history
-
-
-# ==============================================================================
-# What this step is doing — and why
-
 
 def download_prices(tickers, start="2000-01-01", end=None):
     raw = yf.download(
@@ -109,11 +99,6 @@ print(prices.count().sort_values(ascending=False).to_frame("n_days"))
 # ==============================================================================
 # 4. Quick price-history sanity check
 
-
-# ==============================================================================
-# What this step is doing — and why
-
-
 fig, ax = plt.subplots(figsize=(12, 6))
 
 normalized = prices / prices.apply(lambda s: s.dropna().iloc[0])
@@ -134,11 +119,6 @@ plt.show()
 # ==============================================================================
 # 5. Calculate drawdown from the trailing 52-week high
 
-
-# ==============================================================================
-# What this step is doing — and why
-
-
 rolling_high = prices.rolling(
     LOOKBACK,
     min_periods=MIN_HISTORY,
@@ -151,7 +131,6 @@ print(drawdown.tail())
 
 # ==============================================================================
 # 6. Visualize drawdowns
-
 
 ticker = "AAPL"
 
@@ -172,11 +151,6 @@ plt.show()
 
 # ==============================================================================
 # 7. Detect dip events
-
-
-# ==============================================================================
-# What this step is doing — and why
-
 
 def detect_dip_events(drawdown_df, thresholds=THRESHOLDS):
     events = []
@@ -220,11 +194,6 @@ print(
 
 # ==============================================================================
 # 8. Add forward returns after each dip
-
-
-# ==============================================================================
-# What this step is doing — and why
-
 
 def add_forward_returns(events_df, prices_df, horizons=HORIZONS):
     output = []
@@ -272,11 +241,6 @@ print(results.head(20))
 # ==============================================================================
 # 9. Summarize post-dip returns
 
-
-# ==============================================================================
-# What this step is doing — and why
-
-
 def summarize_dip_results(results_df, horizon="1y"):
     col = f"return_{horizon}"
 
@@ -293,7 +257,6 @@ def summarize_dip_results(results_df, horizon="1y"):
     )
 
     return summary
-
 
 summary_1y = summarize_dip_results(results, horizon="1y")
 
@@ -318,11 +281,6 @@ print(
 
 # ==============================================================================
 # 10. Calculate each stock's unconditional forward returns
-
-
-# ==============================================================================
-# What this step is doing — and why
-
 
 def baseline_returns(prices_df, horizons=HORIZONS):
     rows = []
@@ -356,13 +314,6 @@ print(baseline)
 
 # ==============================================================================
 # 11. Compute the dip edge
-
-
-# ==============================================================================
-# What this step is doing — and why
-# ==============================================================================
-# What the current output says
-
 
 baseline_1y = (
     baseline[baseline["horizon"] == "1y"]
@@ -417,7 +368,6 @@ print(
 # ==============================================================================
 # 12. Plot: 1-year dip edge by stock and threshold
 
-
 plot_df = comparison_1y.pivot(
     index="ticker",
     columns="threshold_pct",
@@ -446,11 +396,6 @@ print(f"Saved: {output_path}")
 
 # ==============================================================================
 # 13. Plot: pooled results across focus stocks
-
-
-# ==============================================================================
-# What this step is doing — and why
-
 
 pooled_1y = (
     results
@@ -539,11 +484,7 @@ print(
 
 # ==============================================================================
 # 15. Optional: impose a cooldown between dip events
-
-
-# ==============================================================================
-# What this step is doing — and why
-
+# Really not optional if you want to limit bias
 
 def apply_event_cooldown(events_df, prices_df, cooldown_days=63):
     kept = []
@@ -591,7 +532,6 @@ print(
 # ==============================================================================
 # A sensitivity check you should actually look at
 
-
 # Recompute the 1-year dip edge after imposing the cooldown.
 results_cooldown = add_forward_returns(events_cooldown, prices)
 summary_cooldown_1y = summarize_dip_results(results_cooldown, horizon="1y")
@@ -623,11 +563,6 @@ print(
 # Portfolio-level test: does "buy the dip" work as an actual allocation rule?
 # ==============================================================================
 # Default portfolio rules
-
-
-# ==============================================================================
-# Why the portfolio test is a separate question
-
 
 PORTFOLIO_THRESHOLDS = [-0.10, -0.20, -0.30, -0.50]
 POSITION_WEIGHT = 0.20
@@ -722,11 +657,6 @@ def build_equal_weight_benchmark(prices_df, drawdown_df):
 
 # ==============================================================================
 # Convert target weights into realized returns
-
-
-# ==============================================================================
-# Corrected execution logic
-
 
 def run_weighted_portfolio(
     prices_df,
@@ -829,11 +759,6 @@ benchmark_portfolio = run_weighted_portfolio(
 
 # ==============================================================================
 # Portfolio return, risk, and upside/downside capture
-
-
-# ==============================================================================
-# What these metrics are telling you
-
 
 def monthly_compound_returns(daily_returns):
     grouped = daily_returns.groupby(daily_returns.index.to_period("M"))
@@ -1054,11 +979,6 @@ print(
 
 # ==============================================================================
 # Portfolio wealth curves
-
-
-# ==============================================================================
-# How to interpret this figure
-
 
 wealth_to_plot = pd.DataFrame({
     "Equal-weight benchmark": benchmark_portfolio["wealth"],
